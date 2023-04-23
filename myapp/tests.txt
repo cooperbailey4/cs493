@@ -1,0 +1,69 @@
+POST tests
+# tests the working conditions of the post method, the post method should add one business, review, or photo (specified in the url)
+# to the end of a list of the items. requires the necessary keys for each list, and allows for optional keys.
+
+# BUSINESS tests should work except when a field is not included when necessary or an extraneous field is included
+# these tests should work
+curl -v -X POST -H 'Content-Type: application/json' -d '{"business": "newbusiness", "address": "130 unknown avenue", "city": "undisclosed", "state": "undisclosed", "ZIP": "12350", "phone": "541 000 0009", "category": "newcategory"}' http://localhost:3000/businesses
+curl -v -X POST -H 'Content-Type: application/json' -d '{"business": "newbusiness", "address": "130 unknown avenue", "city": "undisclosed", "state": "undisclosed", "ZIP": "12350", "phone": "541 000 0009", "category": "newcategory", "website": "www.nextnewbusiness.com", "email":"email@newbusiness.com"}' http://localhost:3000/businesses
+# these test should fail
+curl -v -X POST -H 'Content-Type: application/json' -d '{"address": "130 unknown avenue", "city": "undisclosed", "state": "undisclosed", "ZIP": "12350", "phone": "541 000 0009", "category": "newcategory", "website": "www.nextnewbusiness.com", "email":"email@newbusiness.com"}' http://localhost:3000/businesses
+curl -v -X POST -H 'Content-Type: application/json' -d '{"business": "newbusiness", "hasDonuts": "yes", "address": "130 unknown avenue", "city": "undisclosed", "state": "undisclosed", "ZIP": "12350", "phone": "541 000 0009", "category": "newcategory", "website": "www.nextnewbusiness.com", "email":"email@newbusiness.com"}' http://localhost:3000/businesses
+
+# REVIEWS require a businessid and a userid, which will then be deleted before posted to the reviews list, but it will not work if the businessId doesn't exist in the businesses
+# this test will work
+curl -v -X POST -H 'Content-Type: application/json' -d '{"businessId":"2", "userId":"10", "stars":"5", "dollars":"4"}' http://localhost:3000/reviews
+# this test should fail
+curl -v -X POST -H 'Content-Type: application/json' -d '{"businessId":"99", "userId":"10", "stars":"5", "dollars":"4"}' http://localhost:3000/reviews
+
+# PHOTOS require a businessId and a URL and an optional caption
+# this tests should work
+curl -v -X POST -H 'Content-Type: application/json' -d '{"businessid":"1", "URL":"www.newphoto.com", "caption":"this is a newly posted photo"}' http://localhost:3000/photos
+# this test should fail
+curl -v -X POST -H 'Content-Type: application/json' -d '{"URL":"www.newphoto.com", "caption":"this is a newly posted photo"}' http://localhost:3000/photos
+
+
+PUT tests
+# these tests check that the PUT method can insert/modify businesses, reviews and photos at specific places in the lists
+
+# BUSINESS tests should work except when a field is not included when necessary or an extraneous field is included, or there is no index specified at the end of the URL
+# these tests should work
+curl -v -X PUT -H 'Content-Type: application/json' -d '{"business": "newbusiness", "address": "130 unknown avenue", "city": "undisclosed", "state": "undisclosed", "ZIP": "12350", "phone": "541 000 0009", "category": "newcategory"}' http://localhost:3000/businesses/1
+curl -v -X PUT -H 'Content-Type: application/json' -d '{"business": "newbusiness", "address": "130 unknown avenue", "city": "undisclosed", "state": "undisclosed", "ZIP": "12350", "phone": "541 000 0009", "category": "newcategory", "website": "www.nextnewbusiness.com", "email":"email@newbusiness.com"}' http://localhost:3000/businesses/10
+# these test should fail
+curl -v -X PUT -H 'Content-Type: application/json' -d '{"address": "130 unknown avenue", "city": "undisclosed", "state": "undisclosed", "ZIP": "12350", "phone": "541 000 0009", "category": "newcategory", "website": "www.nextnewbusiness.com", "email":"email@newbusiness.com"}' http://localhost:3000/businesses/1
+curl -v -X PUT -H 'Content-Type: application/json' -d '{"business": "newbusiness", "hasDonuts": "yes", "address": "130 unknown avenue", "city": "undisclosed", "state": "undisclosed", "ZIP": "12350", "phone": "541 000 0009", "category": "newcategory", "website": "www.nextnewbusiness.com", "email":"email@newbusiness.com"}' http://localhost:3000/businesses/1
+
+
+# REVIEWS require a businessid and a userid, which will then be deleted before posted to the reviews list, but it will not work if the businessid doesn't exist in the businesses, it also requires an index to place the review on the end of the URL
+# this test will work
+curl -v -X PUT -H 'Content-Type: application/json' -d '{"businessId":"2", "userId":"10", "stars":"5", "dollars":"4"}' http://localhost:3000/reviews/2
+# this test should fail
+curl -v -X PUT -H 'Content-Type: application/json' -d '{"businessId":"99", "userId":"10", "stars":"5", "dollars":"4"}' http://localhost:3000/reviews/2
+
+# PHOTOS require a businessId and a URL and an optional caption
+# this tests should work
+curl -v -X PUT -H 'Content-Type: application/json' -d '{"businessid":"1", "URL":"www.newphoto.com", "caption":"this is a newly posted photo"}' http://localhost:3000/photos/3
+# this test should fail
+curl -v -X PUT -H 'Content-Type: application/json' -d '{"URL":"www.newphoto.com", "caption":"this is a newly posted photo"}' http://localhost:3000/photos/3
+
+
+Delete tests
+# test the working conditions of the delete function using curl,
+delete can remove businesses based on their id and will delete the business entirely,
+all id's should remain the same even after deletion.
+
+# this should work
+curl -X DELETE localhost:3000/businesses/1
+# this should not work
+curl -X DELETE localhost:3000/businesses
+
+# this should work
+curl -X DELETE localhost:3000/reviews/1-2
+# this should not work
+curl -X DELETE localhost:3000/reviews/1
+
+# this should work
+curl -X DELETE localhost:3000/photos/1-0
+# this shouldn't work
+curl -X DELETE localhost:3000/photos/1
