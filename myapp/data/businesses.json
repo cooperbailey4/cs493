@@ -1,0 +1,41 @@
+{
+"0": {
+"business": "computersNstuff",
+"address": "123 lane",
+"city": "undisclosed",
+"state": "undisclosed",
+"ZIP": "12345",
+"phone": "541 000 0000",
+"category": "Restaurant"
+},
+
+"1": {
+"business": "Incipisphere",
+"address": "124 lane",
+"city": "undisclosed",
+"state": "undisclosed",
+"ZIP": "12346",
+"phone": "541 000 0001",
+"category": "Orphanage"},
+
+"2": {
+"business": "laminitis",
+"address": "125 lane",
+"city": "undisclosed",
+"state": "undisclosed",
+"ZIP": "12347",
+"phone": "541 000 0002",
+"category": "Restaurant"
+},
+
+"3": {
+"business": "McDonalds",
+"address": "126 lane",
+"city": "undisclosed",
+"state": "undisclosed",
+"ZIP": "12348",
+"phone": "541 000 0003",
+"category": "Real Estate"
+}
+
+}

@@ -1,0 +1,99 @@
+docker network create --driver bridge mysql-net
+
+docker run -d --n mysql-server --network mysql-net -p 3306:3306 -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" -e "MYSQL_DATABASE=bookaplace" -e "MYSQL_USER=bookaplace" -e "MYSQL_PASSWORD=somepassword" mysql ( -d means run detatched)
+
+docker container ls
+
+docker run --rm -it --network mysql-net mysql mysql -h mysql-server -u bookaplace -p
+
+show tables
+
+use bookaplace
+
+show databases
+
+code to start:
+
+back in app.js add:
+const mysqlPool = require('./lib/mysqlpool')
+
+function getLodgingsCount() {
+    const [ results ] = await mysqlPool.query(
+        "SELECT COUNT(*) AS count FROM lodgings"
+    )
+    return results[0].count;
+}
+
+async function getLodgingsPage(page) {
+    const count = await getLodgingsCount();
+
+    const pageSize = 2; //10;
+    const lastPage = Math.ceil(count/pageSize);
+
+    page = page > lastPage? lastPage: page;
+    page = page <1? 1: page;
+
+    const offset = (page - 1) * pageSize;
+
+    const [results] = await mysqlPool.query(
+        "SELECT * FROM lodgings ORDER BY id LIMIT ?, ?",
+        [offset, pageSize]
+    );
+
+    return {
+        lodgings: results,
+        page: page,
+        totalPages: lastPage,
+        count: count
+    }
+}
+
+app.get('/lodgings', async (req, res) => {
+    try {
+    const page = req.query.page || 1;
+    const lodgingPage = awaitgetLodgingsPage(page);
+    res.status(200).send(lodgingsPage);
+    }
+    catch(err) {
+        res.status(500).json({
+            error: 'Error getting lodgings: ${err}'
+        });
+    }
+});
+
+app.get('/count', (req, res) => {
+    const count = getLodgingsCount();
+    res.send('Count: ${count}');
+});
+
+
+in mysqlpool.js:
+
+const mysql = require('mysql2/promise');
+
+const mysqlHost = process.env.MYSQL_HOST || 'localhost'
+const mysqlPort = process.env.MYSQL_PORT || '3306';
+const mysqlDB = process.env.MYSQL_DB;
+const mysqlUser = process.env.MYSQL_USER;
+const mysqlPassword = process.env.MYSQL_PASSWORD;
+
+const maxMySQLConnections = 10;
+
+const mysqlPool = mysql.createPool({
+    connectionLimit: maxMySQLConnections,
+    host: mysqlHost,
+    port: mysqlPort,
+    database: mysqlDB,
+    user: mysqlUser,
+    password: mysqlPassword
+});
+
+module.exports = mysqlPool;
+
+
+in console setting enviroment variables
+
+export MYSQL_DB = bookaplace
+export MYSQL_USER = bookaplace
+export MYSQL_PASSWORD = somepassword
+
