@@ -3,6 +3,7 @@ const router = require('express').Router();
 
 const businesses = require('../data/businesses');
 const { validate } = require('./validate');
+const mysqlPool = require('../lib/mysqlpool');
 
 exports.router = router;
 exports.businesses = businesses;
@@ -12,9 +13,47 @@ exports.postBusinesses = postBusinesses;
 exports.putBusinessAtIndex = putBusinessAtIndex;
 exports.deleteBusinessAtIndex = deleteBusinessAtIndex;
 
+async function getBusinessesCount() {
+  const [ results ] = await mysqlPool.query(
+      "SELECT COUNT(*) AS count FROM lodgings"
+  );
+  return results[0].count;
+}
 
-function getBusinesses(req, res) {
-    res.status(200).json(businesses);
+async function getBusinessesPage(page) {
+  const count = await getBusinessesCount();
+  const pageSize = 10;
+  const lastPage = Math.ceil(count / pageSize);
+  page = page > lastPage ? lastPage : page;
+  page = page < 1 ? 1 : page;
+  const offset = (page - 1) * pageSize;
+  const [ results ] = await mysqlPool.query(
+    'SELECT * FROM lodgings ORDER BY id LIMIT ?,?',
+    [offset, pageSize]
+  );
+  return {
+    businesses: results,
+    page: page,
+    totalPages: lastPage,
+    pageSize: pageSize,
+    count: count
+  };
+
+}
+
+async function getBusinesses(req, res) {
+    // res.status(200).json(businesses);
+  try {
+    // print("here")
+    const businessesPage = await getBusinessesPage(parseInt(req.query.page) || 1);
+    res.status(200).send(businessesPage);
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).json({
+      error: "Error fetching businesses list. Try again later."
+  });
+  }
 };
 
 function getBusinessAtIndex(req, res) {

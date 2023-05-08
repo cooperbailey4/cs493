@@ -6,6 +6,7 @@ const port = 3000
 app.set('json spaces', 4)
 const jsonParser = bodyParser.json();
 
+
 const { getBusinesses, getBusinessAtIndex, postBusinesses, putBusinessAtIndex, deleteBusinessAtIndex } = require('./api/businesses');
 const { getAllBusinessReviews, getReviewsOfBusiness, postReview, putReviewAtIndex, deleteReviewAtIndex } = require('./api/reviews');
 const { getPhotos, getPhotosOfBusinesses, postPhotos, putPhotosAtIndex, deletePhotosAtIndex } = require('./api/photos');
@@ -15,7 +16,7 @@ let nextKey = 4;
 // root function
 
 app.get("/", (req, res) => {
-  res.send("Hello World!\n If you don't know what to do,your not supposed to be here yet");
+  res.send("Hello World!\n If you don't know what to do, your not supposed to be here yet");
 })
 
 app.get("/businesses", getBusinesses)

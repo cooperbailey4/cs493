@@ -97,3 +97,20 @@ export MYSQL_DB = bookaplace
 export MYSQL_USER = bookaplace
 export MYSQL_PASSWORD = somepassword
 
+
+week 6
+when writing cryptography, use others libraries for doing encryption, because its really hard
+don't write your own cryto libraries
+
+don't store a password in plain text, store them unreadably hash them
+use Salting
+
+How to store a password and how to verify a user
+
+
+app.use(bodyParser.json());
+app.post("/users/new")
+app.post("/login")
+
+
+npm install --save bcrypt
