@@ -2,56 +2,80 @@
 const router = require('express').Router();
 const { validate } = require('./validate');
 
-const businesses = require('../data/businesses');
-const photos = require('../data/photos');
+// const businesses = require('../data/businesses');
+// const photos = require('../data/photos');
+const mysqlPool = require('../lib/mysqlpool');
 
 exports.router = router;
-exports.photos = photos;
+// exports.photos = photos;
 exports.getPhotos = getPhotos;
-exports.getPhotosOfBusinesses = getPhotosOfBusinesses;
+exports.getPhotosAtIndex = getPhotosAtIndex;
 exports.postPhotos = postPhotos;
 exports.putPhotosAtIndex = putPhotosAtIndex;
 exports.deletePhotosAtIndex = deletePhotosAtIndex;
 
-
-function getPhotos(req, res) {
-    res.status(200).json(photos);
+async function getPhotosCount() {
+  const [ results ] = await mysqlPool.query(
+      'SELECT COUNT(*) AS count FROM photos'
+  );
+  return results[0].count;
 }
 
-function getPhotosOfBusinesses(req, res) {
-  if(req.params.id.includes('-')){
-    const { id } = req.params;
-    const [key, index] = id.split('-'); // splitting the id to get key and index
+async function getPhotosPage(page) {
+  const count = await getPhotosCount();
+  const pageSize = 10;
+  const lastPage = Math.ceil(count / pageSize);
+  page = page > lastPage ? lastPage : page;
+  page = page < 1 ? 1 : page;
+  const offset = (page - 1) * pageSize;
+  const [ results ] = await mysqlPool.query(
+    'SELECT * FROM photos ORDER BY id LIMIT ?,?',
+    [offset, pageSize]
+  );
+  return {
+    photos: results,
+    page: page,
+    totalPages: lastPage,
+    pageSize: pageSize,
+    count: count
+  };
 
-    if(key in photos) {
-      if(index in photos[key]) {
-        res.json(photos[key][index])
-      }
-      else {
-        res.status(400).json({
-          "err": "no photos at given index"
-        });
-      }
-    }
-    else {
-      res.status(400).json({
-        "err": "business has no photos"
-      });
-    }
+}
+
+async function getPhotos(req, res) {
+  try {
+    const photosPage = await getPhotosPage(parseInt(req.query.page) || 1);
+    res.status(200).send(photosPage);
   }
-  else {
-    const id = req.params.id;
+  catch (err) {
+    console.log(err)
+    res.status(500).json({
+      error: "Error fetching photos list. Try again later."
+  });
+  }
+}
 
-    if (id in photos){
-      res.json(photos[id]);
+async function getPhotosAtIndex(req, res) {
+  const id = req.params.id;
+
+  try {
+    const [results] = await mysqlPool.query('SELECT * FROM photos WHERE id = ?',
+    id
+    );
+    if (results.length == 0) {
+      res.status(404).json({"Error": "id does not exist"});
     }
     else{
-      res.status(400).json({
-          "err": "index out of range"
-      });
+      res.json(results[0]);
+      return results[0];
     }
   }
-}
+  catch(err) {
+    res.status(400).json({
+        "err": err
+    });
+  }
+};
 
 function postPhotos(req, res) {
   const validString = validate(req.body, ["businessId", "URL"], ["caption"]);
@@ -107,25 +131,25 @@ function putPhotosAtIndex(req, res) {
   }
 }
 
-function deletePhotosAtIndex(req, res) {
-  const { id } = req.params;
-  const [key, index] = id.split('-'); // splitting the id to get key and index
-
-  if (!(key in photos)) {
-    res.status(404).send(`photos with key ${key} not found`);
-    return;
+async function deletePhotosAtIndex(req, res) {
+  const id = req.params.id;
+  try {
+    const [results] = await mysqlPool.query('DELETE FROM photos WHERE id = ?',
+    id
+    );
+    if (results.length == 0) {
+      res.status(404).json({"Error": "id does not exist"});
+    }
+    else {
+      res.json({
+      "status": "deleted",
+      "id": id});
+      return results[0];
+    }
   }
-
-  if (!(index in photos[key])) {
-    res.status(404).send(`photos with index ${index} not found`);
-    return;
+  catch(err) {
+    res.status(400).json({
+        "err": err
+    });
   }
-
-  photos[key].splice(index, 1); // remove the review at the specified index
-  res.json({
-    "status": "deleted",
-    "businessId": key,
-    "index": index
-  });
-
 }

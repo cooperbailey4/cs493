@@ -2,58 +2,80 @@
 const router = require('express').Router();
 const { validate } = require('./validate');
 
-const businesses = require('../data/businesses');
-const reviews = require('../data/reviews');
+// const businesses = require('../data/businesses');
+// const reviews = require('../data/reviews');
+const mysqlPool = require('../lib/mysqlpool');
 
 exports.router = router;
-exports.reviews = reviews;
+// exports.reviews = reviews;
 exports.getAllBusinessReviews = getAllBusinessReviews;
-exports.getReviewsOfBusiness = getReviewsOfBusiness;
+exports.getReviewAtIndex = getReviewAtIndex;
 exports.postReview = postReview;
 exports.putReviewAtIndex = putReviewAtIndex;
 exports.deleteReviewAtIndex = deleteReviewAtIndex;
 
-
-
-function getAllBusinessReviews(req, res) {
-  res.status(200).json(reviews);
+async function getReviewsCount() {
+  const [ results ] = await mysqlPool.query(
+      'SELECT COUNT(*) AS count FROM reviews'
+  );
+  return results[0].count;
 }
 
-function getReviewsOfBusiness(req, res){
-  if(req.params.id.includes('-')){
-    const { id } = req.params;
-    const [key, index] = id.split('-'); // splitting the id to get key and index
+async function getReviewsPage(page) {
+  const count = await getReviewsCount();
+  const pageSize = 10;
+  const lastPage = Math.ceil(count / pageSize);
+  page = page > lastPage ? lastPage : page;
+  page = page < 1 ? 1 : page;
+  const offset = (page - 1) * pageSize;
+  const [ results ] = await mysqlPool.query(
+    'SELECT * FROM reviews ORDER BY id LIMIT ?,?',
+    [offset, pageSize]
+  );
+  return {
+    reviews: results,
+    page: page,
+    totalPages: lastPage,
+    pageSize: pageSize,
+    count: count
+  };
 
-    if(key in reviews) {
-      if(index in reviews[key]) {
-        res.json(reviews[key][index])
-      }
-      else {
-        res.status(400).json({
-          "err": "no review at given index"
-        });
-      }
-    }
-    else {
-      res.status(400).json({
-        "err": "business has no reviews"
-      });
-    }
+}
+
+async function getAllBusinessReviews(req, res) {
+  try {
+    const reviewsPage = await getReviewsPage(parseInt(req.query.page) || 1);
+    res.status(200).send(reviewsPage);
   }
-  else {
-    const id = req.params.id;
+  catch (err) {
+    console.log(err)
+    res.status(500).json({
+      error: "Error fetching reviews list. Try again later."
+  });
+  }
+}
 
-    if (id in reviews){
-      res.json(reviews[id]);
+async function getReviewAtIndex(req, res) {
+  const id = req.params.id;
+
+  try {
+    const [results] = await mysqlPool.query('SELECT * FROM reviews WHERE id = ?',
+    id
+    );
+    if (results.length == 0) {
+      res.status(404).json({"Error": "id does not exist"});
     }
     else{
-      res.status(400).json({
-          "err": "id out of range"
-      });
+      res.json(results[0]);
+      return results[0];
     }
   }
-
-}
+  catch(err) {
+    res.status(400).json({
+        "err": err
+    });
+  }
+};
 
 
 function postReview(req, res) {
@@ -111,26 +133,25 @@ function putReviewAtIndex(req, res) {
   }
 }
 
-function deleteReviewAtIndex(req, res) {
-  const { id } = req.params;
-  const [key, index] = id.split('-'); // splitting the id to get key and index
-
-  if (!(key in reviews)) {
-    res.status(404).send(`Review with key ${key} not found`);
-    return;
+async function deleteReviewAtIndex(req, res) {
+  const id = req.params.id;
+  try {
+    const [results] = await mysqlPool.query('DELETE FROM reviews WHERE id = ?',
+    id
+    );
+    if (results.length == 0) {
+      res.status(404).json({"Error": "id does not exist"});
+    }
+    else {
+      res.json({
+      "status": "deleted",
+      "id": id});
+      return results[0];
+    }
   }
-
-  if (!(index in reviews[key])) {
-    res.status(404).send(`Review with index ${index} not found`);
-    return;
+  catch(err) {
+    res.status(400).json({
+        "err": err
+    });
   }
-
-  reviews[key].splice(index, 1); // remove the review at the specified index
-  res.json({
-    "status": "deleted",
-    "businessId": key,
-    "index": index
-  });
-
-
 }
