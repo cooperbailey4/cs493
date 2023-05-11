@@ -5,14 +5,21 @@ const { validate } = require('./validate');
 // const businesses = require('../data/businesses');
 // const photos = require('../data/photos');
 const mysqlPool = require('../lib/mysqlpool');
+const { validateAgainstSchema, extractValidFields } = require('./validation');
 
 exports.router = router;
 // exports.photos = photos;
 exports.getPhotos = getPhotos;
 exports.getPhotosAtIndex = getPhotosAtIndex;
 exports.postPhotos = postPhotos;
-exports.putPhotosAtIndex = putPhotosAtIndex;
+exports.putPhotoAtIndex = putPhotoAtIndex;
 exports.deletePhotosAtIndex = deletePhotosAtIndex;
+
+const photoSchema = {
+  userid: { required: true },
+  businessid: { required: true },
+  caption: { required: false }
+};
 
 async function getPhotosCount() {
   const [ results ] = await mysqlPool.query(
@@ -77,59 +84,70 @@ async function getPhotosAtIndex(req, res) {
   }
 };
 
-function postPhotos(req, res) {
-  const validString = validate(req.body, ["businessId", "URL"], ["caption"]);
+async function postPhotos(req, res) {
 
-  id = req.body.businessId;
-  delete req.body.businessId;
-
-  if (validString != "ok") {
-    res.status(400).json({"err ": validString});
+  try {
+    const id = await insertNewPhoto(req.body);
+    res.status(201).send({ id: id });
   }
-  else {
-    if(id in businesses) {
-      if (!(id in photos)){
-        photos[id] = [];
-      }
-      photos[id].push(req.body);
-      res.json({
-          "status": "ok",
-          "id": photos[id].length-1
-      });
-    }
-    else {
-      res.status(400).json({"err ": "no business for photos"})
-    }
-
+  catch {
+    res.status(500).send({
+      error: "Error inserting photo into DB."
+  });
   }
+};
+
+async function insertNewPhoto(photo) {
+  const validatedPhoto = extractValidFields(photo, photoSchema);
+
+  const [ result ] = await mysqlPool.query(
+    'INSERT INTO photos SET ?',
+    validatedPhoto
+  );
+
+  return result.insertId;
+
 }
 
-function putPhotosAtIndex(req, res) {
-  const validString = validate(req.body, ["businessId", "URL"], ["caption"]);
-  business = req.body.businessId;
-  const id = req.params.id;
+async function updatePhotoByID(photoId, photo) {
+  const validatedPhoto = extractValidFields(photo, photoSchema);
+  const [ result ] = await mysqlPool.query(
+      'UPDATE photos SET ? WHERE id = ?',
+      [ validatedPhoto, photoId ]
+  );
+  return result.affectedRows > 0;
+}
 
-  delete req.body.businessId;
+async function putPhotoAtIndex(req, res) {
 
-  if (validString !== "ok") {
-    res.status(400).json({ err: validString });
-  }
-  else {
-    if (business in businesses) {
-      photos[business][id] = req.body;
-      res.json({
+  if (validateAgainstSchema(req.body, photoSchema)) {
+    try {
+      const id = req.params.id;
+      const updateSuccessful = await updatePhotoByID(parseInt(id), req.body);
+      if (updateSuccessful > 0) {
+        res.status(200).send({
         "status": "ok",
-        "businessId": business,
         "index": id
-      });
+        });
+      }
+      else {
+        next();
+      }
     }
-    else{
-      res.json({
-        "status": "error: no business matches businessId"
+    catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: "Unable to update photo."
       });
     }
   }
-}
+  else {
+    res.status(400).send({
+      err: "Request body does not contain a valid photo."
+    });
+  }
+};
+
 
 async function deletePhotosAtIndex(req, res) {
   const id = req.params.id;
@@ -137,7 +155,7 @@ async function deletePhotosAtIndex(req, res) {
     const [results] = await mysqlPool.query('DELETE FROM photos WHERE id = ?',
     id
     );
-    if (results.length == 0) {
+    if (results.affectedRows == 0) {
       res.status(404).json({"Error": "id does not exist"});
     }
     else {

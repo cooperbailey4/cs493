@@ -4,6 +4,7 @@ const { validate } = require('./validate');
 
 // const businesses = require('../data/businesses');
 // const reviews = require('../data/reviews');
+const { validateAgainstSchema, extractValidFields } = require('./validation');
 const mysqlPool = require('../lib/mysqlpool');
 
 exports.router = router;
@@ -13,6 +14,14 @@ exports.getReviewAtIndex = getReviewAtIndex;
 exports.postReview = postReview;
 exports.putReviewAtIndex = putReviewAtIndex;
 exports.deleteReviewAtIndex = deleteReviewAtIndex;
+
+const reviewSchema = {
+  userid: { required: true },
+  businessid: { required: true },
+  dollars: { required: true },
+  stars: { required: true },
+  review: { required: false }
+};
 
 async function getReviewsCount() {
   const [ results ] = await mysqlPool.query(
@@ -78,60 +87,72 @@ async function getReviewAtIndex(req, res) {
 };
 
 
-function postReview(req, res) {
-  const validString = validate(req.body, [ "businessId", "userId", "stars", "dollars"], ["review"])
+async function postReview(req, res) {
 
-  id = req.body.businessId;
-  delete req.body.businessId;
-
-  if (validString != "ok") {
-    res.status(400).json({"err ": validString});
+  try {
+    const id = await insertNewReview(req.body);
+    res.status(201).send({ id: id });
   }
-  else {
-    if(id in businesses) {
-      if (!(id in reviews)){
-        reviews[id] = [];
-      }
-      reviews[id].push(req.body);
-      res.json({
-          "status": "ok",
-          "id": reviews[id].length-1
-      });
-    }
-    else {
-      res.status(400).json({"err ": "no business to review"})
-    }
-
+  catch (err){
+    console.log(err);
+    res.status(500).send({
+      error: "Error inserting review into DB."
+  });
   }
+};
+
+async function insertNewReview(review) {
+  const validatedReview = extractValidFields(review, reviewSchema);
+
+  const [ result ] = await mysqlPool.query(
+    'INSERT INTO reviews SET ?',
+    validatedReview
+  );
+
+  return result.insertId;
 
 }
 
-function putReviewAtIndex(req, res) {
-  const validString = validate(req.body, ["businessId", "userId", "stars", "dollars"], ["review"]);
-  business = req.body.businessId;
-  const id = req.params.id;
 
-  delete req.body.businessId;
+async function updateReviewByID(reviewId, review) {
+  const validatedReview = extractValidFields(review, reviewSchema);
+  const [ result ] = await mysqlPool.query(
+      'UPDATE reviews SET ? WHERE id = ?',
+      [ validatedReview, reviewId ]
+  );
+  return result.affectedRows > 0;
+}
 
-  if (validString !== "ok") {
-    res.status(400).json({ err: validString });
-  }
-  else {
-    if (business in businesses) {
-      reviews[business][id] = req.body;
-      res.json({
+async function putReviewAtIndex(req, res) {
+
+  if (validateAgainstSchema(req.body, reviewSchema)) {
+    try {
+      const id = req.params.id;
+      const updateSuccessful = await updateReviewByID(parseInt(id), req.body);
+      if (updateSuccessful > 0) {
+        res.status(200).send({
         "status": "ok",
-        "businessId": business,
-        "id": id
-      });
+        "index": id
+        });
+      }
+      else {
+        next();
+      }
     }
-    else{
-      res.json({
-        "status": "error: no business matches businessId"
+    catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: "Unable to update review."
       });
     }
   }
-}
+  else {
+    res.status(400).send({
+      err: "Request body does not contain a valid review."
+    });
+  }
+};
+
 
 async function deleteReviewAtIndex(req, res) {
   const id = req.params.id;
@@ -139,7 +160,7 @@ async function deleteReviewAtIndex(req, res) {
     const [results] = await mysqlPool.query('DELETE FROM reviews WHERE id = ?',
     id
     );
-    if (results.length == 0) {
+    if (results.affectedRows == 0) {
       res.status(404).json({"Error": "id does not exist"});
     }
     else {

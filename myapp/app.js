@@ -9,7 +9,7 @@ const jsonParser = bodyParser.json();
 
 const { getBusinesses, getBusinessAtIndex, postBusinesses, putBusinessAtIndex, deleteBusinessAtIndex } = require('./api/businesses');
 const { getAllBusinessReviews, getReviewAtIndex, postReview, putReviewAtIndex, deleteReviewAtIndex } = require('./api/reviews');
-const { getPhotos, getPhotosAtIndex, postPhotos, putPhotosAtIndex, deletePhotosAtIndex } = require('./api/photos');
+const { getPhotos, getPhotosAtIndex, postPhotos, putPhotoAtIndex, deletePhotosAtIndex } = require('./api/photos');
 
 let nextKey = 4;
 
@@ -23,23 +23,20 @@ app.get("/", (req, res) => {
 
 app.get("/businesses", getBusinesses)
 app.get("/businesses/:id", getBusinessAtIndex)
-//Completed up to here
 app.post("/businesses", jsonParser, postBusinesses)
 app.put("/businesses/:id", jsonParser, putBusinessAtIndex)
 app.delete("/businesses/:id", jsonParser, deleteBusinessAtIndex)
 
 app.get("/reviews", getAllBusinessReviews)
 app.get("/reviews/:id", getReviewAtIndex)
-//Completed up to here
 app.post("/reviews", jsonParser, postReview)
 app.put("/reviews/:id", jsonParser, putReviewAtIndex)
 app.delete("/reviews/:id", jsonParser, deleteReviewAtIndex)
 
 app.get("/photos", getPhotos)
 app.get("/photos/:id", getPhotosAtIndex)
-//Completed up to here
 app.post("/photos", jsonParser, postPhotos)
-app.put("/photos/:id", jsonParser, putPhotosAtIndex)
+app.put("/photos/:id", jsonParser, putPhotoAtIndex)
 app.delete("/photos/:id", jsonParser, deletePhotosAtIndex)
 
 app.listen(port, () => {

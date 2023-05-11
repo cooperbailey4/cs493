@@ -2,7 +2,7 @@
 const router = require('express').Router();
 
 // const businesses = require('../data/businesses_new');
-const { validate } = require('./validate');
+const { validateAgainstSchema, extractValidFields } = require('./validation');
 const mysqlPool = require('../lib/mysqlpool');
 
 exports.router = router;
@@ -13,19 +13,19 @@ exports.postBusinesses = postBusinesses;
 exports.putBusinessAtIndex = putBusinessAtIndex;
 exports.deleteBusinessAtIndex = deleteBusinessAtIndex;
 
-// const businessSchema = {
-//   ownerid: { required: true },
-//   name: { required: true },
-//   address: { required: true },
-//   city: { required: true },
-//   state: { required: true },
-//   zip: { required: true },
-//   phone: { required: true },
-//   category: { required: true },
-//   subcategory: { required: true },
-//   website: { required: false },
-//   email: { required: false }
-// };
+const businessSchema = {
+  ownerid: { required: true },
+  name: { required: true },
+  street: { required: true },
+  city: { required: true },
+  state: { required: true },
+  zip: { required: true },
+  phone: { required: true },
+  category: { required: true },
+  subcategory: { required: false },
+  website: { required: false },
+  email: { required: false }
+};
 
 async function getBusinessesCount() {
   const [ results ] = await mysqlPool.query(
@@ -91,65 +91,66 @@ async function getBusinessAtIndex(req, res) {
 };
 
 async function postBusinesses(req, res) {
-  // const validString = validate(req.body, ["id", "ownerid", "business", "address", "city", "state", "ZIP", "phone", "category", "subcategory"], ["website", "email"])
 
   try {
-    // if (validString == "ok")
-    // businesses[nextKey] = req.body;
-    // res.json({
-    //     "status": "ok",
-    //     "id": nextKey++
-    // });
     const id = await insertNewBusiness(req.body);
     res.status(201).send({ id: id });
   }
   catch {
     res.status(500).send({
-      error: "Error inserting lodging into DB."
+      error: "Error inserting business into DB."
   });
   }
 };
 
-// async function insertNewBusiness(business) {
-//   const validatedBusiness = extractValidFields(business, businessSchema);
+async function insertNewBusiness(business) {
+  const validatedBusiness = extractValidFields(business, businessSchema);
 
-//   const [ result ] = await mysqlPool.query(
-//     'INSERT INTO lodgings SET ?',
-//     validatedBusiness
-//   );
+  const [ result ] = await mysqlPool.query(
+    'INSERT INTO businesses SET ?',
+    validatedBusiness
+  );
 
-//   return result.insertId;
+  return result.insertId;
 
-// }
+}
 
+async function updateBusinessByID(businessId, business) {
+  const validatedBusiness = extractValidFields(business, businessSchema);
+  const [ result ] = await mysqlPool.query(
+      'UPDATE businesses SET ? WHERE id = ?',
+      [ validatedBusiness, businessId ]
+  );
+  return result.affectedRows > 0;
+}
 
+async function putBusinessAtIndex(req, res) {
 
-function putBusinessAtIndex(req, res) {
-  const validString = validate(req.body, ["id", "ownerid", "business", "address", "city", "state", "ZIP", "phone", "category", "subcategory"], ["website", "email"])
-
-  const id = req.params.id;
-
-  if (validString != "ok") {
-    res.status(400).json({"err": validString});
-  }
-  else{
-    if (id in businesses) {
-    businesses[id] = req.body;
-    res.json({
-      "status": "ok",
-      "id": id
-    });
-    }
-    else {
-      businesses[id] = req.body;
-      if (id >= nextKey){
-        nextKey = id + 1;
+  if (validateAgainstSchema(req.body, businessSchema)) {
+    try {
+      const id = req.params.id;
+      const updateSuccessful = await updateBusinessByID(parseInt(req.params.id), req.body);
+      if (updateSuccessful > 0) {
+        res.status(200).send({
+          "status": "ok",
+          "index": id
+        });
       }
-      res.json({
-        "status": "ok",
-        "id": id
+      else {
+        next();
+      }
+    }
+    catch (err) {
+      console.log(err)
+      res.status(500).send({
+        error: "Unable to update business."
       });
     }
+  }
+  else {
+    res.status(400).send({
+      err: "Request body does not contain a valid Business."
+    });
   }
 };
 
@@ -159,7 +160,7 @@ async function deleteBusinessAtIndex(req, res) {
     const [results] = await mysqlPool.query('DELETE FROM businesses WHERE id = ?',
     id
     );
-    if (results.length == 0) {
+    if (results.affectedRows == 0) {
       res.status(404).json({"Error": "id does not exist"});
     }
     else {
