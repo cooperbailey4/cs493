@@ -92,7 +92,13 @@ curl -X DELETE localhost:3000/users/
 
 
 # login tests
-curl -X POST -H "Content-Type: application/json" -d '{"id": "17", "password": "ectobiologist"}' http://localhost:3000/users/login
+curl -X POST -H "Content-Type: application/json" -d '{"userid": "17", "password": "ectobiologist"}' http://localhost:3000/users/login
 
-curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODQ3MjM1MDYsImV4cCI6MTY4NDgwOTkwNn0.Tikt-mzFiLKYgyKoEs02mHY7cO4GoT4X2lcUG86a3iY" http://localhost:3000/users/17
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiaWF0IjoxNjg0Nzg4NzYwLCJleHAiOjE2ODQ4NzUxNjB9.-1EV8qwJ-8AvWrCN5H91cE-b7k_A5IZ9GgNaDlYMVB4" -X DELETE http://localhost:3000/reviews/1
+
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiaWF0IjoxNjg0Nzk3MTY4LCJleHAiOjE2ODQ4ODM1Njh9.KpULYvKwaaBoDQMWXKcCcfyvYShgZNSIBgRi0Z8TOF8" -d '{"userid": "7", "businessid": "200", "caption": "new post photo"}' localhost:3000/photos
+
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiaWF0IjoxNjg0Nzk3MTY4LCJleHAiOjE2ODQ4ODM1Njh9.KpULYvKwaaBoDQMWXKcCcfyvYShgZNSIBgRi0Z8TOF8" -d '{"userid": "7", "businessid": "200", "dollars": "5", "stars": "3"}' localhost:3000/reviews
+
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiaWF0IjoxNjg0Nzk3MTY4LCJleHAiOjE2ODQ4ODM1Njh9.KpULYvKwaaBoDQMWXKcCcfyvYShgZNSIBgRi0Z8TOF8" -d '{"ownerid": "7", "name": "computersNstuff", "street": "7200 NW Grandview Dr.", "city": "Corvallis", "state": "OR", "zip": "97702", "phone": "541 000 0000", "category": "Computer Store"}' localhost:3000/businesses
 

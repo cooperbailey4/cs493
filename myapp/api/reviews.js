@@ -89,8 +89,15 @@ async function getReviewAtIndex(req, res) {
 async function postReview(req, res) {
 
   try {
-    const id = await insertNewReview(req.body);
-    res.status(201).send({ id: id });
+    if (req.user == req.body.userid) {
+      const id = await insertNewReview(req.body);
+      res.status(201).send({ id: id });
+    }
+    else {
+      res.status(400).send({
+        error: "user should be logged in"
+      });
+    }
   }
   catch (err){
     console.log(err);
@@ -113,11 +120,11 @@ async function insertNewReview(review) {
 };
 
 
-async function updateReviewByID(reviewId, review) {
+async function updateReviewByID(reviewId, review, user) {
   const validatedReview = extractValidFields(review, reviewSchema);
   const [ result ] = await mysqlPool.query(
-      'UPDATE reviews SET ? WHERE id = ?',
-      [ validatedReview, reviewId ]
+      'UPDATE reviews SET ? WHERE id = ? AND userid = ?',
+      [ validatedReview, reviewId, user ]
   );
   return result.affectedRows > 0;
 };
@@ -127,7 +134,7 @@ async function putReviewAtIndex(req, res) {
   if (validateAgainstSchema(req.body, reviewSchema)) {
     try {
       const id = req.params.id;
-      const updateSuccessful = await updateReviewByID(parseInt(id), req.body);
+      const updateSuccessful = await updateReviewByID(parseInt(id), req.body, req.user);
       if (updateSuccessful > 0) {
         res.status(200).send({
         "status": "ok",
@@ -156,8 +163,8 @@ async function putReviewAtIndex(req, res) {
 async function deleteReviewAtIndex(req, res) {
   const id = req.params.id;
   try {
-    const [results] = await mysqlPool.query('DELETE FROM reviews WHERE id = ?',
-    id
+    const [results] = await mysqlPool.query('DELETE FROM reviews WHERE id = ? AND userid = ?',
+    [id, req.user]
     );
     if (results.affectedRows == 0) {
       res.status(404).json({"Error": "id does not exist"});

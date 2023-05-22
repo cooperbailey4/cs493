@@ -89,8 +89,15 @@ async function getPhotosAtIndex(req, res) {
 async function postPhotos(req, res) {
 
   try {
-    const id = await insertNewPhoto(req.body);
-    res.status(201).send({ id: id });
+    if (req.user == req.body.userid) {
+      const id = await insertNewPhoto(req.body);
+      res.status(201).send({ id: id });
+    }
+    else {
+      res.status(400).send({
+        error: "user should be logged in"
+      });
+    }
   }
   catch {
     res.status(500).send({
@@ -111,11 +118,11 @@ async function insertNewPhoto(photo) {
 
 };
 
-async function updatePhotoByID(photoId, photo) {
+async function updatePhotoByID(photoId, photo, user) {
   const validatedPhoto = extractValidFields(photo, photoSchema);
   const [ result ] = await mysqlPool.query(
-      'UPDATE photos SET ? WHERE id = ?',
-      [ validatedPhoto, photoId ]
+      'UPDATE photos SET ? WHERE id = ? AND userid = ?',
+      [ validatedPhoto, photoId, user ]
   );
   return result.affectedRows > 0;
 };
@@ -125,7 +132,7 @@ async function putPhotoAtIndex(req, res) {
   if (validateAgainstSchema(req.body, photoSchema)) {
     try {
       const id = req.params.id;
-      const updateSuccessful = await updatePhotoByID(parseInt(id), req.body);
+      const updateSuccessful = await updatePhotoByID(parseInt(id), req.body, req.user);
       if (updateSuccessful > 0) {
         res.status(200).send({
         "status": "ok",
@@ -154,8 +161,8 @@ async function putPhotoAtIndex(req, res) {
 async function deletePhotosAtIndex(req, res) {
   const id = req.params.id;
   try {
-    const [results] = await mysqlPool.query('DELETE FROM photos WHERE id = ?',
-    id
+    const [results] = await mysqlPool.query('DELETE FROM photos WHERE id = ? AND userid = ?',
+    [id, req.user]
     );
     if (results.affectedRows == 0) {
       res.status(404).json({"Error": "id does not exist"});

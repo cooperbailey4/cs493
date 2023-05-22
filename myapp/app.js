@@ -1,6 +1,5 @@
 const express = require("express")
 const bodyParser = require("body-parser");
-// const verification = require("./api/verification");
 const app = express()
 const port = 3000
 
@@ -19,38 +18,38 @@ const { requireAuthentication } = require('./lib/auth');
 // root function
 
 app.get("/", (req, res) => {
-  res.send("Hello World!\n If you don't know what to do, your not supposed to be here yet");
+  res.send("Hello World! \nIf you don't know what to do, your not supposed to be here yet\n");
 })
 
 // Application End-Points
 
 app.get("/businesses", getBusinesses)
 app.get("/businesses/:id", getBusinessAtIndex)
-app.post("/businesses", jsonParser, postBusinesses)
-app.put("/businesses/:id", jsonParser, putBusinessAtIndex)
-app.delete("/businesses/:id", jsonParser, deleteBusinessAtIndex)
+app.post("/businesses", jsonParser, requireAuthentication, postBusinesses)
+app.put("/businesses/:id", jsonParser, requireAuthentication, putBusinessAtIndex)
+app.delete("/businesses/:id", jsonParser, requireAuthentication, deleteBusinessAtIndex)
 
 app.get("/reviews", getAllBusinessReviews)
 app.get("/reviews/:id", getReviewAtIndex)
-app.post("/reviews", jsonParser, postReview)
-app.put("/reviews/:id", jsonParser, putReviewAtIndex)
-app.delete("/reviews/:id", jsonParser, deleteReviewAtIndex)
+app.post("/reviews", jsonParser, requireAuthentication, postReview)
+app.put("/reviews/:id", jsonParser, requireAuthentication, putReviewAtIndex)
+app.delete("/reviews/:id", jsonParser, requireAuthentication, deleteReviewAtIndex)
 
 app.get("/photos", getPhotos)
 app.get("/photos/:id", getPhotosAtIndex)
-app.post("/photos", jsonParser, postPhotos)
-app.put("/photos/:id", jsonParser, putPhotoAtIndex)
-app.delete("/photos/:id", jsonParser, deletePhotosAtIndex)
+app.post("/photos", jsonParser, requireAuthentication, postPhotos)
+app.put("/photos/:id", jsonParser, requireAuthentication, putPhotoAtIndex)
+app.delete("/photos/:id", jsonParser, requireAuthentication, deletePhotosAtIndex)
 
 app.get("/users", getUsers)
 app.get("/users/:userid", requireAuthentication, getUserByID)
 app.get("/users/:userid/:includePassword", requireAuthentication, getUserByID)
-app.get("/users/:userid/businesses", getBusinessesOfUser)
-app.get("/users/:userid/reviews", getReviewsOfUser)
-app.get("/users/:userid/photos", getPhotosOfUser)
+app.get("/users/:userid/businesses", requireAuthentication, getBusinessesOfUser)
+app.get("/users/:userid/reviews", requireAuthentication, getReviewsOfUser)
+app.get("/users/:userid/photos", requireAuthentication, getPhotosOfUser)
 app.post("/users", jsonParser, postNewUser)
-app.put("/users/:userid", jsonParser, putUserAtIndex)
-app.delete("/users/:userid", jsonParser, deleteUserAtIndex)
+app.put("/users/:userid", jsonParser, requireAuthentication, putUserAtIndex)
+app.delete("/users/:userid", jsonParser, requireAuthentication, deleteUserAtIndex)
 app.post("/users/login", jsonParser, loginUser)
 
 app.listen(port, () => {

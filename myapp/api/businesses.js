@@ -92,8 +92,15 @@ async function getBusinessAtIndex(req, res) {
 async function postBusinesses(req, res) {
 
   try {
-    const id = await insertNewBusiness(req.body);
-    res.status(201).send({ id: id });
+    if (req.user == req.body.ownerid) {
+      const id = await insertNewBusiness(req.body);
+      res.status(201).send({ id: id });
+    }
+    else {
+      res.status(400).send({
+        error: "owner should be logged in"
+      });
+    }
   }
   catch {
     res.status(500).send({
@@ -114,11 +121,11 @@ async function insertNewBusiness(business) {
 
 };
 
-async function updateBusinessByID(businessId, business) {
+async function updateBusinessByID(businessId, business, user) {
   const validatedBusiness = extractValidFields(business, businessSchema);
   const [ result ] = await mysqlPool.query(
-      'UPDATE businesses SET ? WHERE id = ?',
-      [ validatedBusiness, businessId ]
+      'UPDATE businesses SET ? WHERE id = ? AND ownerid = ?',
+      [ validatedBusiness, businessId, user ]
   );
   return result.affectedRows > 0;
 };
@@ -128,7 +135,7 @@ async function putBusinessAtIndex(req, res) {
   if (validateAgainstSchema(req.body, businessSchema)) {
     try {
       const id = req.params.id;
-      const updateSuccessful = await updateBusinessByID(parseInt(req.params.id), req.body);
+      const updateSuccessful = await updateBusinessByID(parseInt(req.params.id), req.body, req.user);
       if (updateSuccessful > 0) {
         res.status(200).send({
           "status": "ok",
@@ -155,9 +162,10 @@ async function putBusinessAtIndex(req, res) {
 
 async function deleteBusinessAtIndex(req, res) {
   const id = req.params.id;
+
   try {
-    const [results] = await mysqlPool.query('DELETE FROM businesses WHERE id = ?',
-    id
+    const [results] = await mysqlPool.query('DELETE FROM businesses WHERE id = ? AND ownerid = ?',
+    [id, req.user]
     );
     if (results.affectedRows == 0) {
       res.status(404).json({"Error": "id does not exist"});

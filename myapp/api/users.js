@@ -285,7 +285,7 @@ async function validateUser(id, password) {
 
     const [results] = await mysqlPool.query(query, [id]);
     if (results.length == 0) {
-      res.status(404).json({ "Error": "id does not exist" });
+      console.log("Error: id does not exist" );
     }
     else {
       user = results[0];
@@ -306,7 +306,7 @@ async function loginUser(req, res) {
       const authenticated = await validateUser(req.body.userid, req.body.password);
 
       if (authenticated) {
-        const token = generateAuthToken(req.body.userID);
+        const token = generateAuthToken(req.body.userid);
         res.status(200).send({ token: token });      }
       else {
         res.status(401).send({
@@ -320,7 +320,7 @@ async function loginUser(req, res) {
     }
   }
   else {
-    res.status(400).json({ error: "Request body needs user ID and password." });
+    res.status(400).json({ error: "Request body needs userid and password." });
   }
 }
 
