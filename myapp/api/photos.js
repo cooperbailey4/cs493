@@ -1,6 +1,5 @@
 // Photos functions
 const router = require('express').Router();
-const { validate } = require('./validate');
 
 // const businesses = require('../data/businesses');
 // const photos = require('../data/photos');
@@ -84,6 +83,9 @@ async function getPhotosAtIndex(req, res) {
   }
 };
 
+
+
+
 async function postPhotos(req, res) {
 
   try {
@@ -107,7 +109,7 @@ async function insertNewPhoto(photo) {
 
   return result.insertId;
 
-}
+};
 
 async function updatePhotoByID(photoId, photo) {
   const validatedPhoto = extractValidFields(photo, photoSchema);
@@ -116,7 +118,7 @@ async function updatePhotoByID(photoId, photo) {
       [ validatedPhoto, photoId ]
   );
   return result.affectedRows > 0;
-}
+};
 
 async function putPhotoAtIndex(req, res) {
 
@@ -170,4 +172,4 @@ async function deletePhotosAtIndex(req, res) {
         "err": err
     });
   }
-}
+};

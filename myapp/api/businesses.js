@@ -1,12 +1,10 @@
 // Buisness functions
 const router = require('express').Router();
 
-// const businesses = require('../data/businesses_new');
 const { validateAgainstSchema, extractValidFields } = require('./validation');
 const mysqlPool = require('../lib/mysqlpool');
 
 exports.router = router;
-// exports.businesses = businesses;
 exports.getBusinesses = getBusinesses;
 exports.getBusinessAtIndex = getBusinessAtIndex;
 exports.postBusinesses = postBusinesses;
@@ -90,6 +88,7 @@ async function getBusinessAtIndex(req, res) {
   }
 };
 
+
 async function postBusinesses(req, res) {
 
   try {
@@ -113,7 +112,7 @@ async function insertNewBusiness(business) {
 
   return result.insertId;
 
-}
+};
 
 async function updateBusinessByID(businessId, business) {
   const validatedBusiness = extractValidFields(business, businessSchema);
@@ -122,7 +121,7 @@ async function updateBusinessByID(businessId, business) {
       [ validatedBusiness, businessId ]
   );
   return result.affectedRows > 0;
-}
+};
 
 async function putBusinessAtIndex(req, res) {
 
@@ -175,4 +174,4 @@ async function deleteBusinessAtIndex(req, res) {
         "err": err
     });
   }
-}
+};

@@ -1,7 +1,9 @@
 const reviews = require('./data/reviews_new.json');
 const businesses = require('./data/businesses_new.json');
 const photos = require('./data/photos_new.json');
+const users = require('./data/users.json');
 const mysqlPool = require('./lib/mysqlpool');
+const bcrypt = require('bcryptjs');
 
 
 
@@ -38,6 +40,21 @@ async function populate() {
         x = await mysqlPool.query(
             'INSERT INTO photos (userid, businessid, caption) VALUES (?, ?, ?)',
             Object.values(photoFields)
+        );
+        console.log(x)
+    }
+    await mysqlPool.query("DROP TABLE IF EXISTS users");
+    await mysqlPool.query('CREATE TABLE users (userid MEDIUMINT NOT NULL AUTO_INCREMENT, name VARCHAR(255) NOT NULL, email VARCHAR(255), password VARCHAR(255) NOT NULL, PRIMARY KEY(userid))');
+    for (let i = 0; i < users.length; i++) {
+        const userFields = users[i];
+        const passwordHash = await bcrypt.hash(users[i].password, 8);
+
+        userFields.password = passwordHash; // Add hashed password to validatedUser
+
+        console.log(userFields);
+        x = await mysqlPool.query(
+            'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+            Object.values(userFields)
         );
         console.log(x)
     }

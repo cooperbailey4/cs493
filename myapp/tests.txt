@@ -1,3 +1,8 @@
+# env variables I use
+# export MYSQL_HOST=localhost
+# export MYSQL_DB=bookaplace
+# export MYSQL_USER=bookaplace
+# export MYSQL_PASSWORD=somepassword
 # first run the server then run
 # node populate.js
 # testing can then take place on the database
@@ -34,6 +39,9 @@ curl -H 'Content-Type: application/json ' -d '{"userid": "0", "businessid": "200
 # this test should fail
 curl -H 'Content-Type: application/json ' -d '{"userid": "0", "businessid": "200", "cation": "new post photo"}' -X POST localhost:3000/photos
 
+# USERS require a name, password and optional email
+# this test should work
+curl -H 'Content-Type: application/json ' -d '{"name": "John Egbert", "email": "ghostyTrickster@pester.com", "password": "ectobiologist"}' -X POST localhost:3000/users
 
 #PUT tests
 # these tests check that the PUT method can insert/modify businesses, reviews and photos at specific places in the lists
@@ -44,7 +52,6 @@ curl -X PUT -H "Content-Type: application/json" -d '{"ownerid": 0, "name": "comp
 # these test should fail
 curl -X PUT -H "Content-Type: application/json" -d '{"newid": 0, "name": "computersNstuff", "street": "7200 NW Grandview Dr.", "city": "Corvallis", "state": "OR", "zip": "97702", "phone": "541 000 0000", "category": "Computer Store", "website": "www.CNS.computer", "email": "emailNstuff@email.com"}' http://localhost:3000/businesses/10
 
-
 # REVIEWS require a businessid and a userid, which will then be deleted before posted to the reviews list, but it will not work if the businessid doesn't exist in the businesses, it also requires an index to place the review on the end of the URL
 # this test will work
 curl -X PUT -H "Content-Type: application/json" -d '{userid: 622, "buisinessid": 413, dollars: 5, stars: 5}' http://localhost:3000/reviews/3
@@ -52,6 +59,11 @@ curl -X PUT -H "Content-Type: application/json" -d '{userid: 622, "buisinessid":
 # PHOTOS require a businessId and a URL and a caption
 # this tests should work
 curl -X PUT -H "Content-Type: application/json" -d '{"userid": "622", "businessid": "413" , "caption": "bluh"}' localhost:3000/photos/9
+
+# USERS require a name, password and optional email
+# this test should work
+curl -X PUT -H 'Content-Type: application/json ' -d '{"name": "rose", "email": "tentacletherapist@pester.com", "password": "meow"}' localhost:3000/users/16
+
 
 Delete tests
 # test the working conditions of the delete function using curl,
@@ -72,3 +84,15 @@ curl -X DELETE localhost:3000/reviews/
 curl -X DELETE localhost:3000/photos/1
 # this shouldn't work
 curl -X DELETE localhost:3000/photos/
+
+# this should work
+curl -X DELETE localhost:3000/users/1
+# this shouldn't work
+curl -X DELETE localhost:3000/users/
+
+
+# login tests
+curl -X POST -H "Content-Type: application/json" -d '{"id": "17", "password": "ectobiologist"}' http://localhost:3000/users/login
+
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2ODQ3MjM1MDYsImV4cCI6MTY4NDgwOTkwNn0.Tikt-mzFiLKYgyKoEs02mHY7cO4GoT4X2lcUG86a3iY" http://localhost:3000/users/17
+

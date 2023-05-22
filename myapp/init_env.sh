@@ -1,0 +1,4 @@
+export MYSQL_HOST=localhost
+export MYSQL_DB=bookaplace
+export MYSQL_USER=bookaplace
+export MYSQL_PASSWORD=somepassword

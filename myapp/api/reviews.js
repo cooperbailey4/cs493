@@ -1,6 +1,5 @@
 // Review functions
 const router = require('express').Router();
-const { validate } = require('./validate');
 
 // const businesses = require('../data/businesses');
 // const reviews = require('../data/reviews');
@@ -111,7 +110,7 @@ async function insertNewReview(review) {
 
   return result.insertId;
 
-}
+};
 
 
 async function updateReviewByID(reviewId, review) {
@@ -121,7 +120,7 @@ async function updateReviewByID(reviewId, review) {
       [ validatedReview, reviewId ]
   );
   return result.affectedRows > 0;
-}
+};
 
 async function putReviewAtIndex(req, res) {
 
@@ -175,4 +174,4 @@ async function deleteReviewAtIndex(req, res) {
         "err": err
     });
   }
-}
+};

@@ -1,6 +1,6 @@
 docker network create --driver bridge mysql-net
 
-docker run -d --n mysql-server --network mysql-net -p 3306:3306 -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" -e "MYSQL_DATABASE=bookaplace" -e "MYSQL_USER=bookaplace" -e "MYSQL_PASSWORD=somepassword" mysql
+docker run -d --name mysql-server --network mysql-net -p 3306:3306 -e "MYSQL_RANDOM_ROOT_PASSWORD=yes" -e "MYSQL_DATABASE=bookaplace" -e "MYSQL_USER=bookaplace" -e "MYSQL_PASSWORD=somepassword" mysql
 
 docker container ls
 
