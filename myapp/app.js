@@ -6,6 +6,9 @@ const port = 3000
 app.set('json spaces', 4)
 const jsonParser = bodyParser.json();
 
+const multer = require('multer');
+const upload = multer({ dest: `../${__dirname}/uploads` });
+
 
 const { getBusinesses, getBusinessAtIndex,  postBusinesses, putBusinessAtIndex, deleteBusinessAtIndex } = require('./api/businesses');
 const { getAllBusinessReviews, getReviewAtIndex, postReview, putReviewAtIndex, deleteReviewAtIndex } = require('./api/reviews');
@@ -13,7 +16,6 @@ const { getPhotos, getPhotosAtIndex,  postPhotos, putPhotoAtIndex, deletePhotosA
 const { getUsers, getUserByID, getBusinessesOfUser, getReviewsOfUser, getPhotosOfUser, postNewUser, putUserAtIndex, deleteUserAtIndex, loginUser} = require('./api/users');
 const { requireAuthentication } = require('./lib/auth');
 
-// let nextKey = 4;
 
 // root function
 
@@ -37,7 +39,7 @@ app.delete("/reviews/:id", jsonParser, requireAuthentication, deleteReviewAtInde
 
 app.get("/photos", getPhotos)
 app.get("/photos/:id", getPhotosAtIndex)
-app.post("/photos", jsonParser, requireAuthentication, postPhotos)
+app.post("/photos", jsonParser, upload.single('image'), postPhotos)  //requireAuthentication,
 app.put("/photos/:id", jsonParser, requireAuthentication, putPhotoAtIndex)
 app.delete("/photos/:id", jsonParser, requireAuthentication, deletePhotosAtIndex)
 

@@ -4,6 +4,7 @@ const photos = require('./data/photos_new.json');
 const users = require('./data/users.json');
 const mysqlPool = require('./lib/mysqlpool');
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
 
 
 
@@ -32,17 +33,25 @@ async function populate() {
         );
         console.log(x)
     }
+
+
     await mysqlPool.query("DROP TABLE IF EXISTS photos");
-    await mysqlPool.query('CREATE TABLE photos (id MEDIUMINT NOT NULL AUTO_INCREMENT, userid MEDIUMINT NOT NULL, businessid MEDIUMINT NOT NULL, caption TEXT, PRIMARY KEY(id))');
+    await mysqlPool.query('CREATE TABLE photos (id MEDIUMINT NOT NULL AUTO_INCREMENT, userid MEDIUMINT NOT NULL, businessid MEDIUMINT NOT NULL, image MEDIUMBLOB NOT NULL, caption TEXT, PRIMARY KEY(id))');
+    const image_names = ["tree.jpg", "images.jpg", "space.png"];
     for (let i = 0; i < photos.length; i++) {
+        const image_num = i % image_names.length
+        let image = fs.readFileSync('./data/images/' + image_names[image_num]);
+        image = new Buffer(image)
         const photoFields = photos[i];
         console.log(photoFields);
         x = await mysqlPool.query(
-            'INSERT INTO photos (userid, businessid, caption) VALUES (?, ?, ?)',
-            Object.values(photoFields)
+            'INSERT INTO photos (userid, businessid, image, caption) VALUES (?, ?, BINARY(?), ?)',
+            [photoFields.userid, photoFields.businessid, image, photoFields.caption]
         );
         console.log(x)
     }
+
+
     await mysqlPool.query("DROP TABLE IF EXISTS users");
     await mysqlPool.query('CREATE TABLE users (userid MEDIUMINT NOT NULL AUTO_INCREMENT, name VARCHAR(255) NOT NULL, email VARCHAR(255), password VARCHAR(255) NOT NULL, PRIMARY KEY(userid))');
     for (let i = 0; i < users.length; i++) {
@@ -60,6 +69,9 @@ async function populate() {
     }
     mysqlPool.end();
 };
+
+
+
 populate();
 
 

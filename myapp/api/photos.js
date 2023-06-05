@@ -6,6 +6,15 @@ const router = require('express').Router();
 const mysqlPool = require('../lib/mysqlpool');
 const { validateAgainstSchema, extractValidFields } = require('./validation');
 
+const multer = require('multer');
+const upload = multer({ dest: `../${__dirname}/uploads` });
+
+
+const imageTypes = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png'
+};
+
 exports.router = router;
 // exports.photos = photos;
 exports.getPhotos = getPhotos;
@@ -35,7 +44,7 @@ async function getPhotosPage(page) {
   page = page < 1 ? 1 : page;
   const offset = (page - 1) * pageSize;
   const [ results ] = await mysqlPool.query(
-    'SELECT * FROM photos ORDER BY id LIMIT ?,?',
+    'SELECT userid, businessid, caption FROM photos ORDER BY id LIMIT ?,?',
     [offset, pageSize]
   );
   return {
@@ -65,15 +74,15 @@ async function getPhotosAtIndex(req, res) {
   const id = req.params.id;
 
   try {
-    const [results] = await mysqlPool.query('SELECT * FROM photos WHERE id = ?',
+    const [results] = await mysqlPool.query('SELECT image FROM photos WHERE id = ?',
     id
     );
     if (results.length == 0) {
       res.status(404).json({"Error": "id does not exist"});
     }
     else{
-      res.json(results[0]);
-      return results[0];
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.send(results[0].image);
     }
   }
   catch(err) {
