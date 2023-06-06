@@ -3,60 +3,70 @@
     "userid": 7,
     "businessid": 8,
     "image": "/data/images/tree.jpg",
+    "mimetype": "image/jpeg",
     "caption": "This is my dinner."
   },
   {
     "userid": 25,
     "businessid": 2,
     "image": "/data/images/images.jpg",
+    "mimetype": "image/jpeg",
     "caption": "NULL"
   },
   {
     "userid": 26,
     "businessid": 1,
     "image": "/data/images/images.jpg",
+    "mimetype": "image/jpeg",
     "caption": "Hops"
   },
   {
     "userid": 21,
     "businessid": 14,
     "image": "/data/images/tree.jpg",
+    "mimetype": "image/jpeg",
     "caption": "NULL"
   },
   {
     "userid": 28,
     "businessid": 18,
     "image": "/data/images/space.png",
+    "mimetype": "image/png",
     "caption": "Sticky Hands"
   },
   {
     "userid": 21,
     "businessid": 9,
     "image": "/data/images/tree.jpg",
+    "mimetype": "image/jpeg",
     "caption": "Popcorn!"
   },
   {
     "userid": 26,
     "businessid": 8,
     "image": "/data/images/space.png",
+    "mimetype": "image/png",
     "caption": "NULL"
   },
   {
     "userid": 25,
     "businessid": 18,
     "image": "/data/images/space.png",
+    "mimetype": "image/png",
     "caption": "Big fermentor"
   },
   {
     "userid": 20,
     "businessid": 2,
     "image": "/data/images/tree.jpg",
+    "mimetype": "image/jpeg",
     "caption": "NULL"
   },
   {
     "userid": 6,
     "businessid": 15,
     "image": "/data/images/images.jpg",
+    "mimetype": "image/jpeg",
     "caption": "Cake!"
   }
 ]

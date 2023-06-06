@@ -36,17 +36,17 @@ async function populate() {
 
 
     await mysqlPool.query("DROP TABLE IF EXISTS photos");
-    await mysqlPool.query('CREATE TABLE photos (id MEDIUMINT NOT NULL AUTO_INCREMENT, userid MEDIUMINT NOT NULL, businessid MEDIUMINT NOT NULL, image MEDIUMBLOB NOT NULL, caption TEXT, PRIMARY KEY(id))');
+    await mysqlPool.query('CREATE TABLE photos (id MEDIUMINT NOT NULL AUTO_INCREMENT, userid MEDIUMINT NOT NULL, businessid MEDIUMINT NOT NULL, image MEDIUMBLOB NOT NULL, mimetype TEXT, caption TEXT, PRIMARY KEY(id))');
     const image_names = ["tree.jpg", "images.jpg", "space.png"];
     for (let i = 0; i < photos.length; i++) {
         const image_num = i % image_names.length
         let image = fs.readFileSync('./data/images/' + image_names[image_num]);
-        image = new Buffer(image)
+        image = Buffer.from(image)
         const photoFields = photos[i];
         console.log(photoFields);
         x = await mysqlPool.query(
-            'INSERT INTO photos (userid, businessid, image, caption) VALUES (?, ?, BINARY(?), ?)',
-            [photoFields.userid, photoFields.businessid, image, photoFields.caption]
+            'INSERT INTO photos (userid, businessid, image, mimetype, caption) VALUES (?, ?, BINARY(?), ?, ?)',
+            [photoFields.userid, photoFields.businessid, image, photoFields.mimetype, photoFields.caption]
         );
         console.log(x)
     }

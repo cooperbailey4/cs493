@@ -7,7 +7,7 @@ app.set('json spaces', 4)
 const jsonParser = bodyParser.json();
 
 const multer = require('multer');
-const upload = multer({ dest: `../${__dirname}/uploads` });
+const upload = multer({ dest: `${__dirname}/uploads` });
 
 
 const { getBusinesses, getBusinessAtIndex,  postBusinesses, putBusinessAtIndex, deleteBusinessAtIndex } = require('./api/businesses');
@@ -39,8 +39,8 @@ app.delete("/reviews/:id", jsonParser, requireAuthentication, deleteReviewAtInde
 
 app.get("/photos", getPhotos)
 app.get("/photos/:id", getPhotosAtIndex)
-app.post("/photos", jsonParser, upload.single('image'), postPhotos)  //requireAuthentication,
-app.put("/photos/:id", jsonParser, requireAuthentication, putPhotoAtIndex)
+app.post("/photos", upload.single('image'), requireAuthentication, postPhotos)
+app.put("/photos/:id", upload.single('image'), requireAuthentication, putPhotoAtIndex)
 app.delete("/photos/:id", jsonParser, requireAuthentication, deletePhotosAtIndex)
 
 app.get("/users", getUsers)
@@ -52,7 +52,10 @@ app.get("/users/:userid/photos", requireAuthentication, getPhotosOfUser)
 app.post("/users", jsonParser, postNewUser)
 app.put("/users/:userid", jsonParser, requireAuthentication, putUserAtIndex)
 app.delete("/users/:userid", jsonParser, requireAuthentication, deleteUserAtIndex)
+
 app.post("/users/login", jsonParser, loginUser)
+
+// app.get("/thumbnails", getThumbnails)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

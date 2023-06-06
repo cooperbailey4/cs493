@@ -96,9 +96,16 @@ curl -X POST -H "Content-Type: application/json" -d '{"userid": "17", "password"
 
 curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiaWF0IjoxNjg0Nzg4NzYwLCJleHAiOjE2ODQ4NzUxNjB9.-1EV8qwJ-8AvWrCN5H91cE-b7k_A5IZ9GgNaDlYMVB4" -X DELETE http://localhost:3000/reviews/1
 
-curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiaWF0IjoxNjg0Nzk3MTY4LCJleHAiOjE2ODQ4ODM1Njh9.KpULYvKwaaBoDQMWXKcCcfyvYShgZNSIBgRi0Z8TOF8" -d '{"userid": "7", "businessid": "200", "caption": "new post photo"}' localhost:3000/photos
+curl -X POST -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNyIsImlhdCI6MTY4NjA3MjM0MiwiZXhwIjoxNjg2MTU4NzQyfQ.rrAICzvxREDkXC6t27PFk8acERSXcwjI700DjgtTcpM" -F "userid=17" -F "businessid=200" -F "image=@data/images/this-is-fine.jpg" -F "mimetype=image/jpeg" -F "caption=new post photo"  localhost:3000/photos
 
 curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiaWF0IjoxNjg0Nzk3MTY4LCJleHAiOjE2ODQ4ODM1Njh9.KpULYvKwaaBoDQMWXKcCcfyvYShgZNSIBgRi0Z8TOF8" -d '{"userid": "7", "businessid": "200", "dollars": "5", "stars": "3"}' localhost:3000/reviews
 
 curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiaWF0IjoxNjg0Nzk3MTY4LCJleHAiOjE2ODQ4ODM1Njh9.KpULYvKwaaBoDQMWXKcCcfyvYShgZNSIBgRi0Z8TOF8" -d '{"ownerid": "7", "name": "computersNstuff", "street": "7200 NW Grandview Dr.", "city": "Corvallis", "state": "OR", "zip": "97702", "phone": "541 000 0000", "category": "Computer Store"}' localhost:3000/businesses
 
+curl -X PUT -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNyIsImlhdCI6MTY4NjA3MjM0MiwiZXhwIjoxNjg2MTU4NzQyfQ.rrAICzvxREDkXC6t27PFk8acERSXcwjI700DjgtTcpM" -F "userid=17" -F "businessid=200" -F "image=@data/images/surprised-pikachu.jpg" -F "mimetype=image/jpeg" -F "caption=new post photo"  localhost:3000/photos/11
+
+
+this is how the post photos work, without
+curl -X POST -F "userid=17" -F "businessid=200" -F "image=@data/images/this-is-fine.jpg" -F "mimetype=image/jpeg" -F "caption=new post photo" localhost:3000/photos
+
+curl -X PUT -F "userid=0" -F "businessid=200" -F "image=@data/images/surprised-pikachu.jpg" -F "mimetype=image/jpeg" -F "caption=new post photo" localhost:3000/photos/11
