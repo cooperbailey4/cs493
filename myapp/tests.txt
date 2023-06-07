@@ -94,9 +94,9 @@ curl -X DELETE localhost:3000/users/
 # login tests
 curl -X POST -H "Content-Type: application/json" -d '{"userid": "17", "password": "ectobiologist"}' http://localhost:3000/users/login
 
-curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiaWF0IjoxNjg0Nzg4NzYwLCJleHAiOjE2ODQ4NzUxNjB9.-1EV8qwJ-8AvWrCN5H91cE-b7k_A5IZ9GgNaDlYMVB4" -X DELETE http://localhost:3000/reviews/1
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNyIsImlhdCI6MTY4NjE2MTYyMSwiZXhwIjoxNjg2MjQ4MDIxfQ.LnpZZWUpOJVRvzwdvxqwLBPvyyB7Cz4iDkjH9TQG9LA" -X DELETE http://localhost:3000/reviews/1
 
-curl -X POST -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNyIsImlhdCI6MTY4NjA3MjM0MiwiZXhwIjoxNjg2MTU4NzQyfQ.rrAICzvxREDkXC6t27PFk8acERSXcwjI700DjgtTcpM" -F "userid=17" -F "businessid=200" -F "image=@data/images/this-is-fine.jpg" -F "mimetype=image/jpeg" -F "caption=new post photo"  localhost:3000/photos
+curl -X POST -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNyIsImlhdCI6MTY4NjE2MTYyMSwiZXhwIjoxNjg2MjQ4MDIxfQ.LnpZZWUpOJVRvzwdvxqwLBPvyyB7Cz4iDkjH9TQG9LA" -F "userid=17" -F "businessid=200" -F "image=@data/images/this-is-fine.jpg" -F "mimetype=image/jpeg" -F "caption=new post photo"  localhost:3000/photos
 
 curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiaWF0IjoxNjg0Nzk3MTY4LCJleHAiOjE2ODQ4ODM1Njh9.KpULYvKwaaBoDQMWXKcCcfyvYShgZNSIBgRi0Z8TOF8" -d '{"userid": "7", "businessid": "200", "dollars": "5", "stars": "3"}' localhost:3000/reviews
 

@@ -67,6 +67,10 @@ async function populate() {
         );
         console.log(x)
     }
+    await mysqlPool.query("DROP TABLE IF EXISTS thumbnails");
+    await mysqlPool.query('CREATE TABLE thumbnails (id MEDIUMINT NOT NULL, thumbnail MEDIUMBLOB NOT NULL, mimetype TEXT, PRIMARY KEY(id))');
+
+
     mysqlPool.end();
 };
 

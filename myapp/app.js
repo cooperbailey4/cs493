@@ -15,8 +15,8 @@ const { getAllBusinessReviews, getReviewAtIndex, postReview, putReviewAtIndex, d
 const { getPhotos, getPhotosAtIndex,  postPhotos, putPhotoAtIndex, deletePhotosAtIndex } = require('./api/photos');
 const { getUsers, getUserByID, getBusinessesOfUser, getReviewsOfUser, getPhotosOfUser, postNewUser, putUserAtIndex, deleteUserAtIndex, loginUser} = require('./api/users');
 const { requireAuthentication } = require('./lib/auth');
-
-
+const { thumbnailSetup, getThumbnailById } = require('./thumb_setup')
+thumbnailSetup()
 // root function
 
 app.get("/", (req, res) => {
@@ -55,7 +55,7 @@ app.delete("/users/:userid", jsonParser, requireAuthentication, deleteUserAtInde
 
 app.post("/users/login", jsonParser, loginUser)
 
-// app.get("/thumbnails", getThumbnails)
+app.get("/thumbnails/:id", getThumbnailById)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

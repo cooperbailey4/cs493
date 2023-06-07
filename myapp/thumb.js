@@ -1,32 +1,19 @@
-const rabbitmqHost = process.env.RABBITMQ_HOST;
-const rabbitmqUrl = `amqp://${rabbitmqHost}`;
-const amqp = require('amqplib');
 
-const sizeOf = require('image-size');
-
-const { thumbnailSetup } = require("./api/photos")
+const { thumbnailSetup } = require("./thumb_setup")
 let channel;
 
-function getDownloadStreamById(id) {
-    const imageData = [];
-    downloadStream.on('data', (data) => {
-      imageData.push(data);
-    });
 
-}
 
-//const message = 'The quick brown fox jumped over the lazy dog';
 
-// message.split(' ').forEach((word) => {
-//     channel.sendToQueue('thumbs', Buffer.from(word));
-// });
 async function main() {
     try {
         channel = await thumbnailSetup()
         console.log("channel running")
         channel.consume("thumb", (msg) => {
         if (msg) {
+            getImageId(msg.content.toString())
             console.log(msg.content.toString());
+
         }
             channel.ack(msg);
         });

@@ -3,12 +3,14 @@ const router = require('express').Router();
 
 const mysqlPool = require('../lib/mysqlpool');
 const { validateAgainstSchema, extractValidFields } = require('./validation');
+const { getChannel, makeThumbnailFromId} = require('../thumb_setup');
+
 const amqp = require('amqplib');
 const rabbitmqHost = process.env.RABBITMQ_HOST;
 const rabbitmqUrl = `amqp://${rabbitmqHost}`;
 
 const fs = require('fs');
-let channel;
+
 
 const imageTypes = {
   'image/jpeg': 'jpg',
@@ -21,7 +23,6 @@ exports.getPhotosAtIndex = getPhotosAtIndex;
 exports.postPhotos = postPhotos;
 exports.putPhotoAtIndex = putPhotoAtIndex;
 exports.deletePhotosAtIndex = deletePhotosAtIndex;
-exports.thumbnailSetup = thumbnailSetup;
 
 const photoSchema = {
   userid: { required: true },
@@ -114,10 +115,10 @@ async function postPhotos(req, res) {
         let image = fs.readFileSync(req.file.path);
         image = Buffer.from(image)
         const id = await insertNewPhoto(image, req);
-        console.log(channel)
+        channel = getChannel()
 
         channel.sendToQueue('thumb', Buffer.from(id.toString()));
-
+        makeThumbnailFromId(id)
         res.status(201).send({ id: id });
       }
 
@@ -163,6 +164,7 @@ async function putPhotoAtIndex(req, res) {
         image = Buffer.from(image)
         const updateSuccessful = await updatePhotoByID(parseInt(id), req, image);
         if (updateSuccessful > 0) {
+          makeThumbnailFromId(id)
           res.status(200).send({
           "status": "ok",
           "index": id
@@ -219,21 +221,5 @@ async function deletePhotosAtIndex(req, res) {
 };
 
 
-// Thumbnails code
 
-async function thumbnailSetup() {
-  try {
-    const connection = await amqp.connect(rabbitmqUrl);
-    const channel = await connection.createChannel();
-    await channel.assertQueue('thumb');
-    return channel;
-  }
-  catch (err) {
-      console.error(err);
-  }
-}
 
-async function thumb() {
-  channel = await thumbnailSetup()
-}
-thumb()
